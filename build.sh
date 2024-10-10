@@ -8,7 +8,7 @@ LIBS_DIR="${PROCESS_DIR}/libs"
 rm -rf ${LIBS_DIR}
 mkdir -p ${LIBS_DIR}
 
-AO_IMAGE="p3rmaw3b/ao:0.1.2"
+AO_IMAGE="p3rmaw3b/ao:0.1.3"
 
 EMXX_CFLAGS="-s MEMORY64=1 -s SUPPORT_LONGJMP=1 /lua-5.3.4/src/liblua.a -I/lua-5.3.4/src"
 
