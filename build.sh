@@ -24,6 +24,10 @@ docker run -v ${SQLLITE_DIR}:/sqlite3 ${AO_IMAGE} sh -c \
 docker run -v ${SQLLITE_DIR}:/sqlite3 ${AO_IMAGE} sh -c \
 		"cd /sqlite3 && emcc -s -c sqlite-vec.c -o sqlite-vec.o ${EMXX_CFLAGS} && emar rcs sqlite-vec.a sqlite-vec.o && rm sqlite-vec.o"
 
+# Build sqlite-vec into a library with emscripten
+docker run -v ${SQLLITE_DIR}:/sqlite3 ${AO_IMAGE} sh -c \
+		"cd /sqlite3 && emcc -s -c lsqlitevec.c -o lsqlitevec.o ${EMXX_CFLAGS} && emar rcs lsqlitevec.a lsqlitevec.o && rm lsqlitevec.o"
+
 # Fix permissions
 sudo chmod -R 777 ${SQLLITE_DIR}
 
@@ -32,6 +36,7 @@ sudo chmod -R 777 ${SQLLITE_DIR}
 cp ${SQLLITE_DIR}/sqlite3.a $LIBS_DIR/sqlite3.a
 cp ${SQLLITE_DIR}/lsqlite3.a $LIBS_DIR/lsqlite3.a
 cp ${SQLLITE_DIR}/sqlite-vec.a $LIBS_DIR/sqlite-vec.a
+cp ${SQLLITE_DIR}/lsqlitevec.a $LIBS_DIR/lsqlitevec.a
 
 
 # Copy config.yml to the process directory
