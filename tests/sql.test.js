@@ -145,16 +145,67 @@ test('graphql', async () => {
             { name: 'Action', value: 'Eval' }
         ],
         Data: `
-local sqlite = require('lsqlite3')
+local sqlite_vec = require('lsqlitevec')
+sqlite_vec.load()
 
-return "hello"
+local sqlite = require('lsqlite3')
+local db = sqlite.open_memory()
+
+local res = db:exec[[
+create virtual table vec_examples using vec0(
+  sample_embedding float[8]
+);
+
+-- vectors can be provided as JSON or in a compact binary format
+insert into vec_examples(rowid, sample_embedding)
+  values
+    (1, '[-0.200, 0.250, 0.341, -0.211, 0.645, 0.935, -0.316, -0.924]'),
+    (2, '[0.443, -0.501, 0.355, -0.771, 0.707, -0.708, -0.185, 0.362]'),
+    (3, '[0.716, -0.927, 0.134, 0.052, -0.669, 0.793, -0.634, -0.162]'),
+    (4, '[-0.710, 0.330, 0.656, 0.041, -0.990, 0.726, 0.385, -0.958]');
+
+-- KNN style query
+select
+  rowid,
+  distance
+from vec_examples
+where sample_embedding match '[0.890, 0.544, 0.825, 0.961, 0.358, 0.0196, 0.521, 0.175]'
+order by distance
+limit 2;
+]]
+if res ~= sqlite.OK then
+    return "Error setting up: " .. db:errmsg()
+end
+
+local query = [[
+select
+  rowid,
+  distance
+from vec_examples
+where sample_embedding match '[0.890, 0.544, 0.825, 0.961, 0.358, 0.0196, 0.521, 0.175]'
+order by distance
+limit 2;
+]]
+
+local stmt = db:prepare(query);
+if stmt == nil then
+    return db:errmsg()
+end
+
+local outputString = ""
+while stmt:step() == sqlite.ROW do
+    outputString = outputString .. stmt:get_value(1) .. ','
+end
+
+return outputString
 `
     }
 
     // load handler
     const result = await handle(null, msg, env)
+    delete result.Memory
 
-    console.log(result)
+    // console.log(result)
 
-    assert.ok(true)
+    assert.strictEqual(result.Output?.data, '2.3868737220764,2.3897850513458,')
 })
