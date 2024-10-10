@@ -20,6 +20,10 @@ docker run -v ${SQLLITE_DIR}:/sqlite3 ${AO_IMAGE} sh -c \
 docker run -v ${SQLLITE_DIR}:/sqlite3 ${AO_IMAGE} sh -c \
 		"cd /sqlite3 && emcc -s -c lsqlite3.c -o lsqlite3.o ${EMXX_CFLAGS} && emar rcs lsqlite3.a lsqlite3.o && rm lsqlite3.o"
 
+# Build sqlite-vec into a library with emscripten
+docker run -v ${SQLLITE_DIR}:/sqlite3 ${AO_IMAGE} sh -c \
+		"cd /sqlite3 && emcc -s -c sqlite-vec.c -o sqlite-vec.o ${EMXX_CFLAGS} && emar rcs sqlite-vec.a sqlite-vec.o && rm sqlite-vec.o"
+
 # Fix permissions
 sudo chmod -R 777 ${SQLLITE_DIR}
 
@@ -27,6 +31,7 @@ sudo chmod -R 777 ${SQLLITE_DIR}
 # # Copy luagraphqlparser to the libs directory
 cp ${SQLLITE_DIR}/sqlite3.a $LIBS_DIR/sqlite3.a
 cp ${SQLLITE_DIR}/lsqlite3.a $LIBS_DIR/lsqlite3.a
+cp ${SQLLITE_DIR}/sqlite-vec.a $LIBS_DIR/sqlite-vec.a
 
 
 # Copy config.yml to the process directory
